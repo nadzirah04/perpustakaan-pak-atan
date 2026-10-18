@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Perpustakaan Ajaib Didi & Friends</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #101d35;
+  color: white;
+  font-family: system-ui, Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* PERPUSTAKAAN */
+
+#scene {
+  position: absolute;
+  inset: 0;
+  background: #15223b;
+  overflow: hidden;
+}
+
+#world {
+  position: absolute;
+  width: 1650px;
+  height: 928px;
+  transform-origin: top left;
+  background: url("library.png") center / 100% 100% no-repeat;
+}
+
+#world::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    #08122555,
+    transparent 30%
+  );
+}
+
+/* EMPAT ZON */
+
+.zone {
+  position: absolute;
+  border: 3px solid transparent;
+  border-radius: 35px;
+  cursor: pointer;
+  transition: 0.2s;
+  z-index: 2;
+}
+
+.zone:hover,
+.zone.near {
+  border-color: #ffffff99;
+  box-shadow:
+    0 0 32px #ffffff88,
+    inset 0 0 32px #ffffff55;
+  background: #ffffff11;
+}
+
+.zone:focus-visible {
+  outline: 4px solid yellow;
+}
+
+.zone span {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 60%);
+  background: #101a30e8;
+  border: 1px solid #ffffff77;
+  border-radius: 25px;
+  padding: 8px 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  opacity: 0;
+}
+
+.zone:hover span,
+.zone.near span {
+  opacity: 1;
+}
+
+/* WATAK PAK ATAN */
+
+.player {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  width: 95px;
+  height: 115px;
+  transform: translate(-50%, -85%);
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 9px 6px #0009);
+}
+
+.pak-atan-character {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: center bottom;
+  user-select: none;
+}
+
+/* ANIMASI BERJALAN */
+
+.player.walk .pak-atan-character {
+  animation: pakAtanWalk 0.25s ease-in-out infinite alternate;
+}
+
+@keyframes pakAtanWalk {
+  from {
+    translate: 0 0;
+    rotate: -4deg;
+  }
+
+  to {
+    translate: 0 -7px;
+    rotate: 4deg;
+  }
+}
+
+/* ANIMASI KETIKA BERHENTI */
+
+.player:not(.walk) .pak-atan-character {
+  animation: pakAtanIdle 2s ease-in-out infinite;
+}
+
+@keyframes pakAtanIdle {
+  0%, 100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: 0 -3px;
+  }
+}
+
+/* PAPARAN ARAHAN */
+
+#hud {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 10;
+  background: #101b32d9;
+  padding: 12px 17px;
+  border-radius: 18px;
+  max-width: min(380px, 75vw);
+  border: 1px solid #ffffff55;
+  backdrop-filter: blur(10px);
+}
+
+#hud strong {
+  font-size: 17px;
+}
+
+#hud small {
+  display: block;
+  margin-top: 4px;
+  color: #dce8ff;
+}
+
+#controls {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: #111c32d9;
+  padding: 10px 15px;
+  border-radius: 18px;
+  text-align: center;
+  font-size: 13px;
+  border: 1px solid #ffffff55;
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+}
+
+/* BUTANG GURU */
+
+#edit {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+  border: 1px solid #ffffff77;
+  background: #101b32e8;
+  color: white;
+  border-radius: 14px;
+  padding: 12px;
+  font-weight: 700;
+}
+
+/* MODAL BAHAN */
+
+.modal {
+  position: absolute;
+  inset: 0;
+  background: #060e20c9;
+  z-index: 30;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.panel {
+  width: min(680px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #f8faff;
+  color: #1b2d4c;
+  border-radius: 24px;
+  padding: 25px;
+  box-shadow: 0 20px 90px #0008;
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+}
+
+.panel p {
+  color: #47566e;
+}
+
+.close {
+  float: right;
+  border: 0;
+  background: #e7eaf2;
+  border-radius: 10px;
+  padding: 7px 11px;
+}
+
+.item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #d7e0f2;
+  border-radius: 13px;
+  background: white;
+}
+
+.item a {
+  color: #125ac1;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.pill {
+  background: #e6f0ff;
+  color: #194f9e;
+  border-radius: 12px;
+  padding: 8px 12px;
+  border: 0;
+  font-weight: 700;
+}
+
+.danger {
+  background: #ffe5e5;
+  color: #a52323;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #c4cee0;
+  border-radius: 10px;
+  margin: 5px 0 13px;
+}
+
+label {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.primary {
+  background: #1264c5;
+  color: white;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 800;
+}
+
+.help {
+  font-size: 12px;
+  color: #62708b;
+}
+
+/* KAWALAN TELEFON */
+
+.mobile {
+  display: none;
+  position: absolute;
+  bottom: 20px;
+  left: 15px;
+  z-index: 12;
+  gap: 5px;
+  grid-template-columns: repeat(3, 46px);
+}
+
+.mobile button {
+  height: 45px;
+  border-radius: 12px;
+  border: 1px solid #ffffff99;
+  background: #132442cc;
+  color: white;
+  font-weight: bold;
+  touch-action: none;
+}
+
+.mobile .action {
+  grid-column: 3;
+  grid-row: 2;
+  background: #eab546;
+  color: #1e2636;
+}
+
+@media (max-width: 700px) {
+  .mobile {
+    display: grid;
+  }
+
+  #controls {
+    bottom: 12px;
+    left: auto;
+    right: 10px;
+    transform: none;
+    width: 145px;
+    font-size: 11px;
+  }
+
+  #hud {
+    font-size: 12px;
+    padding: 8px;
+    max-width: 65vw;
+  }
+
+  #hud strong {
+    font-size: 13px;
+  }
+
+  #edit {
+    font-size: 12px;
+    padding: 9px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PERPUSTAKAAN -->
+
+<div id="scene">
+  <div id="world">
+
+    <div
+      class="zone"
+      data-id="lemah"
+      style="left:3%;top:33%;width:21%;height:31%"
+      tabindex="0">
+      <span>📗 Murid Lemah</span>
+    </div>
+
+    <div
+      class="zone"
+      data-id="sederhana"
+      style="left:27%;top:38%;width:16%;height:26%"
+      tabindex="0">
+      <span>📙 Murid Sederhana</span>
+    </div>
+
+    <div
+      class="zone"
+      data-id="cemerlang"
+      style="left:57%;top:38%;width:17%;height:26%"
+      tabindex="0">
+      <span>🌟 Murid Cemerlang</span>
+    </div>
+
+    <div
+      class="zone"
+      data-id="guru"
+      style="left:77%;top:33%;width:20%;height:31%"
+      tabindex="0">
+      <span>🎓 Panduan Guru</span>
+    </div>
+
+    <!-- PAK ATAN MENGGANTIKAN TELUR -->
+
+    <div class="player" id="player">
+      <img
+        src="pak-atan.png"
+        class="pak-atan-character"
+        alt="Pak Atan"
+        draggable="false">
+    </div>
+
+  </div>
+</div>
+
+<!-- ARAHAN -->
+
+<div id="hud">
+  <strong>✨ Perpustakaan Ajaib Didi & Friends</strong>
+  <small>
+    Bantu Pak Atan meneroka perpustakaan!
+    Gunakan WASD atau anak panah.
+    Dekati rak dan tekan E.
+  </small>
+</div>
+
+<button id="edit">⚙️ Urus Bahan Guru</button>
+
+<div id="controls">
+  ⌨️ WASD / ↑ ↓ ← → untuk bergerak
+  <br>
+  🖱️ Klik rak atau tekan <b>E</b> untuk membaca
+</div>
+
+<!-- KAWALAN MOBILE -->
+
+<div class="mobile">
+  <span></span>
+  <button data-move="up">▲</button>
+  <span></span>
+  <button data-move="left">◀</button>
+  <button data-move="down">▼</button>
+  <button data-move="right">▶</button>
+  <button class="action" id="mobileE">E</button>
+</div>
+
+<!-- PAPARAN BAHAN -->
+
+<div class="modal" id="modal">
+  <div class="panel">
+    <button class="close" id="close">✕ Tutup</button>
+    <div id="content"></div>
+  </div>
+</div>
+
+<script>
+
+/* MAKLUMAT EMPAT ZON */
+
+const Z = {
+  lemah: {
+    name: '📗 Bahan Pembelajaran Murid Lemah',
+    x: .15,
+    y: .67
+  },
+  sederhana: {
+    name: '📙 Bahan Pembelajaran Murid Sederhana',
+    x: .35,
+    y: .67
+  },
+  cemerlang: {
+    name: '🌟 Bahan Pembelajaran Murid Cemerlang',
+    x: .65,
+    y: .67
+  },
+  guru: {
+    name: '🎓 Panduan Guru',
+    x: .85,
+    y: .67
+  }
+};
+
+/* SIMPANAN BAHAN */
+
+const KEY = 'didi-library-materials-v1';
+
+let materials = {
+  lemah: [],
+  sederhana: [],
+  cemerlang: [],
+  guru: []
+};
+
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY));
+
+  if (saved) {
+    for (const k of Object.keys(Z)) {
+      materials[k] = Array.isArray(saved[k])
+        ? saved[k]
+        : [];
+    }
+  }
+} catch (e) {
+  console.warn('Data bahan tidak dapat dibaca.', e);
+}
+
+const save = () => {
+  localStorage.setItem(KEY, JSON.stringify(materials));
+};
+
+/* ELEMEN */
+
+const scene = document.querySelector('#scene');
+const world = document.querySelector('#world');
+const player = document.querySelector('#player');
+const pakAtan = document.querySelector('.pak-atan-character');
+const modal = document.querySelector('#modal');
+const content = document.querySelector('#content');
+
+let px = .5;
+let py = .79;
+let scale = 1;
+let ox = 0;
+let oy = 0;
+let near = null;
+let active = null;
+let editing = false;
+
+const keys = new Set();
+
+/* SAIZ PERPUSTAKAAN */
+
+function layout() {
+  scale = Math.max(
+    innerWidth / 1650,
+    innerHeight / 928
+  );
+
+  ox = (innerWidth - 1650 * scale) / 2;
+  oy = (innerHeight - 928 * scale) / 2;
+
+  world.style.transform =
+    `translate(${ox}px,${oy}px) scale(${scale})`;
+
+  draw();
+}
+
+/* KEDUDUKAN PAK ATAN */
+
+function draw() {
+  player.style.left = (px * 100) + '%';
+  player.style.top = (py * 100) + '%';
+
+  let closest = null;
+  let d = 99;
+
+  for (const [k, z] of Object.entries(Z)) {
+    const dist = Math.hypot(
+      (px - z.x) * 1.25,
+      (py - z.y) * 1.5
+    );
+
+    if (dist < d) {
+      d = dist;
+      closest = k;
+    }
+  }
+
+  near = d < .18 ? closest : null;
+
+  document.querySelectorAll('.zone').forEach(el => {
+    el.classList.toggle(
+      'near',
+      el.dataset.id === near
+    );
+  });
+}
+
+/* PERGERAKAN PAK ATAN */
+
+function frame() {
+  if (!modal.classList.contains('show')) {
+    let dx = 0;
+    let dy = 0;
+
+    if (keys.has('a') || keys.has('arrowleft')) dx--;
+    if (keys.has('d') || keys.has('arrowright')) dx++;
+    if (keys.has('w') || keys.has('arrowup')) dy--;
+    if (keys.has('s') || keys.has('arrowdown')) dy++;
+
+    const moving = dx || dy;
+
+    player.classList.toggle('walk', !!moving);
+
+    /* PAK ATAN MENGHADAP ARAH BERJALAN */
+
+    if (dx < 0) {
+      pakAtan.style.scale = '-1 1';
+    }
+
+    if (dx > 0) {
+      pakAtan.style.scale = '1 1';
+    }
+
+    if (moving) {
+      const n = Math.hypot(dx, dy);
+
+      px = Math.max(
+        .05,
+        Math.min(.95, px + dx / n * .0033)
+      );
+
+      py = Math.max(
+        .61,
+        Math.min(.93, py + dy / n * .0025)
+      );
+
+      draw();
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+/* KESELAMATAN TEKS DAN PAUTAN */
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
+function safeUrl(s) {
+  try {
+    const u = new URL(s);
+    return ['http:', 'https:'].includes(u.protocol)
+      ? u.href
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/* BUKA RUANGAN PEMBELAJARAN */
+
+function show(id) {
+  active = id;
+  editing = false;
+  render();
+  modal.classList.add('show');
+  keys.clear();
+}
+
+/* PAPARAN SENARAI BAHAN */
+
+function render() {
+  const z = Z[active];
+
+  content.innerHTML = `
+    <h2>${z.name}</h2>
+    <p>
+      Pilih bahan untuk mula belajar.
+      Klik pautan untuk membuka bahan dalam tab baharu.
+    </p>
+    <div id="items"></div>
+  `;
+
+  const list = document.querySelector('#items');
+
+  if (!materials[active].length) {
+    list.innerHTML = `
+      <p>
+        📚 Belum ada bahan dimasukkan.
+        Guru boleh tambah bahan melalui
+        ⚙️ Urus Bahan Guru.
+      </p>
+    `;
+  }
+
+  materials[active].forEach((m, i) => {
+    const url = safeUrl(m.url);
+    if (!url) return;
+
+    const row = document.createElement('div');
+    row.className = 'item';
+
+    row.innerHTML = `
+      <div>
+        📖
+        <a
+          href="${escapeHTML(url)}"
+          target="_blank"
+          rel="noopener noreferrer">
+          ${escapeHTML(m.title)}
+        </a>
+        <div class="help">
+          ${escapeHTML(m.type || 'Bahan pembelajaran')}
+        </div>
+      </div>
+      ${
+        editing
+          ? `<button class="pill danger"
+               data-delete="${i}">Padam</button>`
+          : '<span>↗</span>'
+      }
+    `;
+
+    list.append(row);
+  });
+
+  if (editing) {
+    const form = document.createElement('form');
+
+    form.innerHTML = `
+      <hr>
+      <h3>➕ Tambah bahan baharu</h3>
+
+      <label>Nama bahan</label>
+      <input
+        name="title"
+        placeholder="Contoh: Misi Membaca Suku Kata"
+        required
+        maxlength="120">
+
+      <label>Pautan bahan</label>
+      <input
+        name="url"
+        type="url"
+        placeholder="https://..."
+        required>
+
+      <label>Jenis bahan</label>
+      <select name="type">
+        <option>Aktiviti Interaktif</option>
+        <option>Nota / PDF</option>
+        <option>Video</option>
+        <option>Permainan</option>
+        <option>Kuiz</option>
+        <option>Lain-lain</option>
+      </select>
+
+      <button class="primary">Simpan bahan</button>
+
+      <p class="help">
+        Pautan disimpan dalam browser ini sahaja.
+        Gunakan eksport dan import JSON untuk
+        memindahkan senarai bahan ke peranti lain.
+      </p>
+    `;
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const url = safeUrl(data.get('url'));
+
+      if (!url) {
+        alert('Masukkan pautan http/https yang sah.');
+        return;
+      }
+
+      materials[active].push({
+        title: String(data.get('title')).trim(),
+        url,
+        type: String(data.get('type'))
+      });
+
+      save();
+      render();
+    });
+
+    content.append(form);
+
+    content.querySelectorAll('[data-delete]').forEach(b => {
+      b.onclick = () => {
+        if (confirm('Padam pautan ini?')) {
+          materials[active].splice(
+            Number(b.dataset.delete), 1
+          );
+
+          save();
+          render();
+        }
+      };
+    });
+  }
+}
+
+/* PENGURUSAN BAHAN GURU */
+
+function admin() {
+  editing = false;
+  modal.classList.add('show');
+  keys.clear();
+
+  content.innerHTML = `
+    <h2>⚙️ Pengurusan Bahan Guru</h2>
+
+    <p>
+      Pilih ruangan untuk tambah atau padam pautan.
+    </p>
+
+    <div id="adminList"></div>
+
+    <hr>
+
+    <h3>💾 Kongsi bahan antara peranti</h3>
+
+    <button class="pill" id="export">
+      ⬇️ Eksport fail JSON
+    </button>
+
+    <label class="pill" for="import">
+      ⬆️ Import fail JSON
+    </label>
+
+    <input
+      type="file"
+      id="import"
+      accept=".json,application/json"
+      style="display:none">
+
+    <p class="help">
+      Prototaip ini belum mempunyai sistem
+      log masuk guru. Jangan masukkan
+      maklumat sulit.
+    </p>
+  `;
+
+  const list = document.querySelector('#adminList');
+
+  Object.entries(Z).forEach(([k, z]) => {
+    const b = document.createElement('button');
+
+    b.className = 'item';
+    b.style.width = '100%';
+
+    b.innerHTML = `
+      <strong>${z.name}</strong>
+      <span class="pill">
+        Urus (${materials[k].length}) →
+      </span>
+    `;
+
+    b.onclick = () => {
+      active = k;
+      editing = true;
+      render();
+    };
+
+    list.append(b);
+  });
+
+  /* EKSPORT JSON */
+
+  document.querySelector('#export').onclick = () => {
+    const blob = new Blob(
+      [JSON.stringify(materials, null, 2)],
+      { type: 'application/json' }
+    );
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bahan-perpustakaan-didi.json';
+    a.click();
+
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  /* IMPORT JSON */
+
+  document.querySelector('#import').onchange = async e => {
+    try {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const d = JSON.parse(await file.text());
+
+      for (const k of Object.keys(Z)) {
+        if (!Array.isArray(d[k])) {
+          throw Error('Format tidak lengkap');
+        }
+
+        d[k].forEach(m => {
+          if (!m.title || !safeUrl(m.url)) {
+            throw Error('Pautan tidak sah');
+          }
+        });
+      }
+
+      if (confirm('Gantikan semua bahan sedia ada?')) {
+        materials = Object.fromEntries(
+          Object.keys(Z).map(k => [
+            k,
+            d[k].map(m => ({
+              title: String(m.title),
+              url: String(m.url),
+              type: String(
+                m.type || 'Bahan pembelajaran'
+              )
+            }))
+          ])
+        );
+
+        save();
+        admin();
+      }
+    } catch (err) {
+      alert('Fail JSON tidak sah: ' + err.message);
+    }
+  };
+}
+
+/* KLIK RAK */
+
+document.querySelectorAll('.zone').forEach(el => {
+  el.onclick = () => show(el.dataset.id);
+
+  el.onkeydown = e => {
+    if (e.key === 'Enter') {
+      show(el.dataset.id);
+    }
+  };
+});
+
+/* BUTANG GURU */
+
+document.querySelector('#edit').onclick = admin;
+
+/* TUTUP MODAL */
+
+document.querySelector('#close').onclick = () => {
+  modal.classList.remove('show');
+};
+
+modal.addEventListener('click', e => {
+  if (e.target === modal) {
+    modal.classList.remove('show');
+  }
+});
+
+/* KEYBOARD */
+
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+
+  if (
+    ['arrowup', 'arrowdown', 'arrowleft',
+     'arrowright', ' '].includes(k) &&
+    !e.target.matches('input,select,textarea')
+  ) {
+    e.preventDefault();
+  }
+
+  if (e.target.matches('input,select,textarea')) {
+    return;
+  }
+
+  keys.add(k);
+
+  if (
+    k === 'e' &&
+    near &&
+    !modal.classList.contains('show')
+  ) {
+    show(near);
+  }
+
+  if (k === 'escape') {
+    modal.classList.remove('show');
+  }
+});
+
+window.addEventListener('keyup', e => {
+  keys.delete(e.key.toLowerCase());
+});
+
+window.addEventListener('blur', () => {
+  keys.clear();
+});
+
+/* BUTANG PERGERAKAN MOBILE */
+
+document.querySelectorAll('[data-move]').forEach(b => {
+  const k = {
+    up: 'w',
+    down: 's',
+    left: 'a',
+    right: 'd'
+  }[b.dataset.move];
+
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    keys.add(k);
+    b.setPointerCapture(e.pointerId);
+  });
+
+  for (const ev of [
+    'pointerup',
+    'pointercancel',
+    'lostpointercapture'
+  ]) {
+    b.addEventListener(ev, () => keys.delete(k));
+  }
+});
+
+document.querySelector('#mobileE').onclick = () => {
+  if (near) {
+    show(near);
+  } else {
+    alert('Gerakkan Pak Atan lebih dekat ke salah satu sudut.');
+  }
+};
+
+/* MULAKAN PERPUSTAKAAN */
+
+addEventListener('resize', layout);
+
+layout();
+frame();
+
+</script>
+
+</body>
+</html>
